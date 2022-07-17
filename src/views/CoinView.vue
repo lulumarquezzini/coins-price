@@ -1,22 +1,11 @@
 <template>
-  <div class="about">
-    <h1>about</h1>
-  </div>
+  <CoinChart :chartId= "route.params.id"/>
 </template>
 
-<style>
-@media (min-width: 1024px) {
-  .about {
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-  }
-}
-</style>
-
 <script setup>
+import CoinChart from '@/components/CoinChart.vue'
 import { useRoute } from 'vue-router'
 
-  const route = useRoute()
+const route = useRoute()
   
 </script>
