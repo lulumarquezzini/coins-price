@@ -28,6 +28,7 @@
             </table>
             <div class="font-bold text-xl mt-2 mb-2">Select a Date:</div>
             <input v-model="coinDate" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="username" type="date">
+            <p class="text-red-500 text-xs italic">{{canSearch ? '' : 'Please do not select a date greater than today'}}</p>
             <h3 class="text-3xl text-center text-gray-700 font-semibold leading-tight my-3">{{formatCurrency(historicalValue, 2) == '$0.00' ? formatCurrency(historicalValue, 8) : formatCurrency(historicalValue, 2)}}</h3>
             <p class="text-xs text-center leading-tight">{{stringToDate(coinDate)}}</p>
         </div>
@@ -37,18 +38,29 @@
 <script setup>
 import { api } from '../services/api'
 import { formatCurrency } from './utils'
-import { reactive, ref, watchEffect } from 'vue'
+import { reactive, ref, watchEffect, computed } from 'vue'
 
 const props = defineProps(['coinId'])
 
 const coinDate = ref(dateToString(new Date()))
 const historicalValue = ref(null);
 
+const canSearch = computed(() => {
+    const date1 = convertToDate(coinDate.value)
+    const date2 = new Date();
+    const date1WithoutTime = new Date(date1.getTime());
+    const date2WithoutTime = new Date(date2.getTime());
+    date1WithoutTime.setUTCHours(0, 0, 0, 0);
+    date2WithoutTime.setUTCHours(0, 0, 0, 0);
+
+    return date1WithoutTime <= date2WithoutTime
+})
+
 watchEffect(async () => {
-  const [y, m, d] = coinDate.value.split('-');
-  const dateApi = d + '-' + m + '-' + y
-  historicalValue.value = await api.get(`/coins/${props.coinId}/history?date=${dateApi}`)
-                                   .then((response) => { return response.data.market_data.current_price.usd })
+    const [y, m, d] = coinDate.value.split('-');
+    const dateApi = d + '-' + m + '-' + y
+    historicalValue.value = await api.get(`/coins/${props.coinId}/history?date=${dateApi}`)
+                                    .then((response) => { return response.data.market_data.current_price.usd })
 })
 
 const coin = reactive({
@@ -59,6 +71,11 @@ const coin = reactive({
     allTimeLow: 0.00,
     allTimeHigh: 0.00,
 });
+
+function convertToDate(str) {
+  const [y, m, d] = str.split('-')
+  return new Date(+y, m - 1, +d)
+}
 
 function stringToDate(str) {
   return str.replace(/-/g, '/')
