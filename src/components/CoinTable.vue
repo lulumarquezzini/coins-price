@@ -74,6 +74,7 @@
 import { reactive, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { api } from '../services/api'
+import { formatCurrency } from './utils'
 import bitcoinImg from "../assets/bitcoin.png"
 import dacxiImg from "../assets/dacxi.png"
 import ethImg from "../assets/ethereum.png"
@@ -102,15 +103,6 @@ const fetchCoins = () => {
 	).then((result) => (
 		list.coinsList = result.sort(function(a,b){return a.market_cap_rank - b.market_cap_rank})
 	));
-}
-
-const formatCurrency = (number, digits) => {
-    var formatter = new Intl.NumberFormat('en-US', {
-        style: 'currency',
-        currency: 'USD',
-		maximumFractionDigits: digits, 
-    });
-    return formatter.format(number);
 }
 
 const formatAsPercent = (number) => {
